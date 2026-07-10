@@ -1,0 +1,26 @@
+[project]
+name = "deepfake-virtualcam-check"
+version = "0.1.0"
+description = "Explainable virtual-camera and replay risk scoring for realtime video checks"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "opencv-python>=5.0.0.93",
+    "pillow>=12.3.0",
+    "deepfake-media-transport",
+    "deepfake-stream-signature",
+]
+
+[project.scripts]
+deepfake-virtualcam-check = "deepfake_virtualcam_check.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/deepfake_virtualcam_check"]
+
+[tool.uv.sources]
+deepfake-media-transport = { path = "../deepfake-media-transport", editable = true }
+deepfake-stream-signature = { path = "../deepfake-stream-signature", editable = true }
