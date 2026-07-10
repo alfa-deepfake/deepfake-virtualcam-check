@@ -12,7 +12,7 @@ Recommended server-side order:
 
 1. Verify stream signature with `deepfake-stream-signature`.
 2. Collect source metadata and frame observations from the
-   `deepfake-voice-inference` media gateway / UDP capture path.
+   `deepfake-audio-video-inference` media gateway / UDP capture path.
 3. Optionally attach `face-flashing` active challenge output.
 4. Run `deepfake-virtualcam-check`.
 5. Let the caller decide where to send/store the returned score object.
@@ -78,7 +78,7 @@ out of scope for this package and can be aggregated by another service later.
 ```
 
 Frame image decoding can happen outside the core package, but the CLI also has a
-`deepfake-voice-inference` media gateway adapter. With OpenCV installed it can
+`deepfake-audio-video-inference` media gateway adapter. With OpenCV installed it can
 extract brightness, blur, dHash, and Haar face-box metrics from MJPEG packets.
 Without OpenCV/Pillow it still extracts packet timing and payload hashes. If the
 gateway payload contains a `deepfake-stream-signature` envelope, the adapter can
@@ -165,7 +165,7 @@ is performed by another module before this CLI receives the packet metadata.
 
 ## Stream Mode With SSH Tunnel
 
-The current `deepfake-voice-inference` preferred path is TCP stream mode:
+The current `deepfake-audio-video-inference` preferred path is TCP stream mode:
 
 ```text
 stream_client on laptop -> local SSH tunnel -> stream_server on cluster
@@ -209,7 +209,7 @@ DEVICE_LABEL="OBS Virtual Camera" ./scripts/run-tcp-proxy.sh
 SIGNATURE_TRUSTED_KEY="deepfake-client-test=secret" ./scripts/run-tcp-proxy.sh
 SOURCE_WIDTH=320 SOURCE_HEIGHT=240 ./scripts/run-tcp-proxy.sh
 VIDEO_DEVICE=2 ./scripts/run-stream-client.sh
-VOICE_REPO=/path/to/deepfake-voice-inference ./scripts/run-stream-client.sh
+VOICE_REPO=/path/to/deepfake-audio-video-inference ./scripts/run-stream-client.sh
 ```
 
 ## Output
