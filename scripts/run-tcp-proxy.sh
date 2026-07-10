@@ -3,6 +3,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ALFA_ROOT="$(cd "$REPO_ROOT/.." && pwd)"
+MEDIA_TRANSPORT_SRC="$ALFA_ROOT/deepfake-media-transport/src"
+STREAM_SIGNATURE_SRC="$ALFA_ROOT/deepfake-stream-signature/src"
 
 SSH_CONFIG="${SSH_CONFIG:-/dev/null}"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519}"
@@ -28,6 +31,8 @@ SIGNATURE_TRUSTED_KEY="${SIGNATURE_TRUSTED_KEY:-}"
 
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   PYTHON="$PYTHON_BIN"
+elif [[ -x "$ALFA_ROOT/.venv/bin/python" ]]; then
+  PYTHON="$ALFA_ROOT/.venv/bin/python"
 elif [[ -x "$REPO_ROOT/.venv/bin/python" ]]; then
   PYTHON="$REPO_ROOT/.venv/bin/python"
 else
@@ -74,7 +79,7 @@ if [[ -n "$SIGNATURE_TRUSTED_KEY" ]]; then
 fi
 
 if [[ "${DRYRUN:-0}" == "1" ]]; then
-  printf 'PYTHONPATH=%q ' "$REPO_ROOT/src"
+  printf 'PYTHONPATH=%q ' "$REPO_ROOT/src:$MEDIA_TRANSPORT_SRC:$STREAM_SIGNATURE_SRC${PYTHONPATH:+:$PYTHONPATH}"
   printf '%q ' "${PROXY_CMD[@]}"
   printf '\n\n'
   printf '%q ' "${SSH_CMD[@]}"
@@ -104,4 +109,4 @@ echo "Now start the stream client against 127.0.0.1:$PROXY_PORT."
 echo "Waiting up to ${ACCEPT_TIMEOUT}s for the client; capture starts after it connects."
 echo
 
-PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "${PROXY_CMD[@]}"
+PYTHONPATH="$REPO_ROOT/src:$MEDIA_TRANSPORT_SRC:$STREAM_SIGNATURE_SRC${PYTHONPATH:+:$PYTHONPATH}" "${PROXY_CMD[@]}"
