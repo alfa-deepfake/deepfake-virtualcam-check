@@ -26,6 +26,15 @@ ssh -F "$SSH_CONFIG" -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
 set -euo pipefail
 
 cd "$REMOTE_DIR"
+ALFA_ROOT="$(cd "$PWD/.." && pwd)"
+
+if [[ -f "$ALFA_ROOT/.venv/bin/activate" ]]; then
+  # shellcheck disable=SC1091
+  source "$ALFA_ROOT/.venv/bin/activate"
+elif [[ -f "$PWD/.venv/bin/activate" ]]; then
+  # shellcheck disable=SC1091
+  source "$PWD/.venv/bin/activate"
+fi
 
 if ss -ltn "sport = :$REMOTE_STREAM_PORT" | grep -q LISTEN; then
   echo "stream_server is already listening on $REMOTE_STREAM_HOST:$REMOTE_STREAM_PORT"
@@ -39,7 +48,8 @@ VIDEO_CUDA_LIB_ROOT="${VIDEO_CUDA_LIB_ROOT:-$PWD/.venv/lib/python3.10/site-packa
 
 echo "Starting stream_server on $REMOTE_STREAM_HOST:$REMOTE_STREAM_PORT"
 
-PYTHONPATH="$PWD" TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 .venv/bin/python \
+PYTHONPATH="$PWD:$ALFA_ROOT/deepfake-media-transport/src:$ALFA_ROOT/deepfake-stream-signature/src${PYTHONPATH:+:$PYTHONPATH}" \
+TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 python \
   -m backend.media_gateway.stream_server \
   --host "$REMOTE_STREAM_HOST" \
   --port "$REMOTE_STREAM_PORT" \
