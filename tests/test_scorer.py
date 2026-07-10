@@ -64,6 +64,25 @@ class VirtualCamScorerTest(unittest.TestCase):
         self.assertGreaterEqual(result.risk_score, 0.78)
         self.assertIn("known_virtual_camera_device_label", result.reasons)
 
+    def test_known_virtual_camera_label_dominates_clean_lit_stream(self) -> None:
+        payload = StreamCheckInput(
+            signature_status="trusted",
+            source=SourceSignals(device_label="OBS Virtual Camera", width=1280, height=720, fps=30),
+            frames=human_like_frames(),
+            active_challenge=ActiveChallengeSignals(
+                live_probability=0.94,
+                verdict="live",
+                response_score=0.42,
+                mean_latency_ms=110,
+            ),
+        )
+
+        result = score_stream(payload)
+
+        self.assertEqual(Verdict.FAKE, result.verdict)
+        self.assertGreaterEqual(result.risk_score, 0.78)
+        self.assertIn("known_virtual_camera_device_label", result.reasons)
+
     def test_tampered_signature_dominates_sparse_stream(self) -> None:
         payload = StreamCheckInput(
             signature_status="tampered",

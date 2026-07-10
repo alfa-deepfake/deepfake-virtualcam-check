@@ -432,6 +432,11 @@ def _apply_dominance_rules(risk_score: float, components: list[RiskComponent]) -
     if _has_critical_signature_failure(components):
         risk_score = max(risk_score, 0.88)
 
+    if _has_reason(components, "known_virtual_camera_device_label"):
+        risk_score = max(risk_score, 0.78)
+    elif _has_reason(components, "screen_or_window_capture_source"):
+        risk_score = max(risk_score, 0.72)
+
     strong_components = [
         component
         for component in components
@@ -448,6 +453,10 @@ def _has_critical_signature_failure(components: list[RiskComponent]) -> bool:
         component.name == "signature" and component.risk >= 0.95
         for component in components
     )
+
+
+def _has_reason(components: list[RiskComponent], reason: str) -> bool:
+    return any(component.reason == reason for component in components)
 
 
 def _confidence(components: list[RiskComponent], frames: list[FrameObservation]) -> float:
