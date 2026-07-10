@@ -5,7 +5,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ALFA_ROOT="$(cd "$REPO_ROOT/.." && pwd)"
 
-VOICE_REPO="${VOICE_REPO:-$ALFA_ROOT/deepfake-voice-inference}"
+VOICE_REPO="${VOICE_REPO:-$ALFA_ROOT/deepfake-audio-video-inference}"
+MEDIA_TRANSPORT_SRC="$ALFA_ROOT/deepfake-media-transport/src"
+STREAM_SIGNATURE_SRC="$ALFA_ROOT/deepfake-stream-signature/src"
 GATEWAY_HOST="${GATEWAY_HOST:-127.0.0.1}"
 GATEWAY_PORT="${GATEWAY_PORT:-13000}"
 
@@ -25,12 +27,14 @@ SIGNATURE_KEY_ID="${SIGNATURE_KEY_ID:-deepfake-client-test}"
 
 if [[ ! -f "$VOICE_REPO/backend/media_gateway/stream_client.py" ]]; then
   echo "stream_client.py not found in VOICE_REPO=$VOICE_REPO" >&2
-  echo "Set VOICE_REPO=/path/to/deepfake-voice-inference and retry." >&2
+  echo "Set VOICE_REPO=/path/to/deepfake-audio-video-inference and retry." >&2
   exit 1
 fi
 
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   PYTHON="$PYTHON_BIN"
+elif [[ -x "$ALFA_ROOT/.venv/bin/python" ]]; then
+  PYTHON="$ALFA_ROOT/.venv/bin/python"
 elif [[ -x "$VOICE_REPO/.venv/bin/python" ]]; then
   PYTHON="$VOICE_REPO/.venv/bin/python"
 else
@@ -65,7 +69,7 @@ fi
 
 if [[ "${DRYRUN:-0}" == "1" ]]; then
   printf 'cd %q\n' "$VOICE_REPO"
-  printf 'PYTHONPATH=%q ' "$VOICE_REPO"
+  printf 'PYTHONPATH=%q ' "$VOICE_REPO:$MEDIA_TRANSPORT_SRC:$STREAM_SIGNATURE_SRC${PYTHONPATH:+:$PYTHONPATH}"
   printf '%q ' "${CMD[@]}"
   printf '\n'
   exit 0
@@ -73,4 +77,4 @@ fi
 
 cd "$VOICE_REPO"
 echo "Connecting stream_client to $GATEWAY_HOST:$GATEWAY_PORT"
-PYTHONPATH="$VOICE_REPO${PYTHONPATH:+:$PYTHONPATH}" "${CMD[@]}"
+PYTHONPATH="$VOICE_REPO:$MEDIA_TRANSPORT_SRC:$STREAM_SIGNATURE_SRC${PYTHONPATH:+:$PYTHONPATH}" "${CMD[@]}"
